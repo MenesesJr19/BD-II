@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 90px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #184060;
+            overflow-x: hidden;
+            padding-top: 20px;
+            transition: 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-text {
+            display: none;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: white;
+            padding: 27px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .menu i {
+            margin-right: 10px;
+            display: inline;
+        }
+
+        .menu a:hover {
+            background-color: rgba(57, 91, 141, 0.973);
+        }
+
+        .sidebar:hover .menu-text {
+            display: inline;
+        }
+
+        .user-profile {
+            text-align: center;
+            color: #e8e8e8;
+            padding-bottom: 20px;
+        }
+
+        .user-profile img {
+            width: 50px;
+            border-radius: 50%;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 16px;
+        }
+
+
+        .content {
+            margin-left: 250px;
+            padding: 16px;
+        }
+
+        main {
+            background-color: white;
+        }
+
+        form {
+            
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            width: 50px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        select, input[type="submit"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+      
+        select {
+          flex: 2;
+        }
+
+        input[type="submit"] {
+            flex: 1;
+            background-color: #333;
+        }
+
+        button {
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #555;
+        }
+       
+th:nth-child(1), td:nth-child(1) {
+    width: 30%; /* Adjust the width as needed */
+}
+
+th:nth-child(2), td:nth-child(2) {
+    width: 30%; /* Adjust the width as needed */
+}
+
+th:nth-child(3), td:nth-child(3) {
+    width: 20%; /* Adjust the width as needed */
+}
+
+th:nth-child(4), td:nth-child(4) {
+    width: 20%; /* Adjust the width as needed */
+}
+
+/* Ensure there is no additional margin or padding */
+.table-container table {
+    margin: 0;
+    padding: 0;
+}
+        .table-container {
+        max-height: 300px; 
+        overflow-y: auto;
+        margin-right: 115px;
+    }
+    
+    .white-text {
+    color: white;
+  }
+
+    
+    </style>
+    
+    <title>Dashboard</title>
+</head>
+
+<body>
+  <div class="sidebar" id="sidebar">
+    <div class="user-profile">
+      <i class="fas fa-user"></i>
+      <p>Welcome, {{ user_name }}</p>
+  </div>
+      <ul class="menu">
+        <li style="background-color: #1f6797;"><a href="{% url 'bdii_dashboard' %}"><i class="fas fa-chart-line"></i><span class="menu-text">Dashboard</span></a></li>
+        <li><a href="{% url 'bdii_registo_encomenda' %}"><i class="fas fa-clipboard-list"></i><span class="menu-text">Registo Encomenda</span></a></li>
+        <li><a href="{% url 'bdii_producao_equipamentos' %}"><i class="fas fa-cogs"></i><span class="menu-text">Produção de Equipamentos</span></a></li>
+        <li><a href="{% url 'bdii_registar_equipamento' %}"><i class="fas fa-plus"></i><span class="menu-text">Registar Equipamentos</span></a></li>
+        <li><a href="{% url 'bdii_vendas_equipamentos' %}"><i class="fas fa-shopping-cart"></i><span class="menu-text">Vendas de Equipamentos</span></a></li>
+        <li><a href="{% url 'bdii_gestao_clientes' %}"><i class="fas fa-users"></i><span class="menu-text">Gestão de Clientes</span></a></li>
+        <li><a href="{% url 'c_logout' %}"><i class="fas fa-sign-out-alt"></i><span class="menu-text">Logout</span></a></li> 
+      </ul>
+  </div>
+  <div class="content">
+    <main>
+        <!-- Conteúdo da sua página vai aqui -->
+        <section class="entradas">
+            <h2>Entradas de Stock recentes</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Quantidade</th>
+                        <th>Armazem</th>
+                        <th>Data de Entrada</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for component in componente_entrada_stock_recente %}
+                    <tr>
+                        <td>{{ component.0 }}</td>
+                        <td>{{ component.1 }} unidades</td>
+                        <td>{{ component.2 }}</td>
+                        <td>{{ component.3 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+<p></p><p></p><p></p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipamento</th>
+                        <th>Descrição</th>
+                        <th>Armazem</th>
+                        <th>Data de Entrada</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="table-container">
+            <table>
+                <tbody>
+                {% for equipment in equipamento_entrada_stock_recente %}
+                    <tr>
+                        <td>{{ equipment.0 }}</td>
+                        <td>{{ equipment.1 }}</td>
+                        <td>{{ equipment.2 }}</td>
+                        <td>{{ equipment.3 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    
+    <section class="saidas">
+        
+        <h2>Saidas de stock recentes</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Quantidade</th>
+                        <th>Armazem</th>
+                        <th>Data de Saida</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for component in componente_saida_stock_recente %}
+                    <tr>
+                        <td>{{ component.0 }}</td>
+                        <td>{{ component.1 }} unidades</td>
+                        <td>{{ component.2 }}</td>
+                        <td>{{ component.3 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+<p></p><p></p><p></p>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Equipamento</th>
+                        <th>Descrição</th>
+                        <th>Armazem</th>
+                        <th>Data de Saida</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="table-container">
+            <table>
+                <tbody>
+                {% for equipment in equipamento_saida_stock_recente %}
+                    <tr>
+                        <td>{{ equipment.0 }}</td>
+                        <td>{{ equipment.1 }}</td>
+                        <td>{{ equipment.2 }}</td>
+                        <td>{{ equipment.3 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    <section class="componentes-em-low-stock">
+        <h2>Componentes em Low Stock</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Componente</th>
+                        <th>Quantidade</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div class="table-container">
+            <table>
+                <tbody>
+                    {% for component in low_stock_components_data %}
+                    <tr>
+                        <td>{{ component.0 }}</td>
+                        <td>{{ component.1 }} unidades</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    <section class="relatorio-status-inventario">
+        <h2>Relatório Status Inventário</h2>
+        <form action="{% url 'gerar_relatorio_excel' %}" method="get">
+            <select name="mesAno">
+                {% for result in view_meses_anos_componentearmazem %}
+                    <option value="{{ result.0 }}-{{ result.1 }}">
+                        {{ result.0 }}-{{ result.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Gerar" class="white-text">
+        </form>
+    </section>
+    </main>
+  </div>  
+
+</body>
+
+</html>

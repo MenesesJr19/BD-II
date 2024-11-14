@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+
+
+form {
+            max-width: 600px;
+            margin: 0 auto;
+            margin-left: 160px;
+        }
+
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .component-list {
+            margin-top: 10px;
+        }
+
+        .component-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+       
+
+.sidebar {
+            height: 100%;
+            width: 90px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #184060;
+            overflow-x: hidden;
+            padding-top: 20px;
+            transition: 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-text {
+            display: none;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: white;
+            padding: 27px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .menu i {
+            margin-right: 10px;
+            display: inline;
+        }
+
+        .menu a:hover {
+            background-color: rgba(57, 91, 141, 0.973);
+        }
+
+        .sidebar:hover .menu-text {
+            display: inline;
+        }
+
+        .user-profile {
+            text-align: center;
+            color: #e8e8e8;
+            padding-bottom: 20px;
+        }
+
+        .user-profile img {
+            width: 50px;
+            border-radius: 50%;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1f6797;
+        }
+        .custom-button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #e81616;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+    }
+    .custom-button:hover {
+            background-color: #c92626;
+        }
+        select[multiple] {
+        height: auto !important;
+        }
+
+         option:checked::before {
+        content: '\2193'; /* Código unicode para uma seta para baixo */
+        margin-right: 5px;
+        
+        }
+
+        .selected-options {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <title>Registar Encomenda</title>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <div class="user-profile">
+            <i class="fas fa-user"></i>
+            <p>Welcome, {{ user_name }}</p>
+        </div>
+        
+        <ul class="menu">
+            <li><a href="{% url 'bdii_dashboard' %}"><i class="fas fa-chart-line"></i><span class="menu-text">Dashboard</span></a></li>
+            <li style="background-color: #1f6797;"><a href="{% url 'bdii_registo_encomenda' %}"><i class="fas fa-clipboard-list"></i><span class="menu-text">Registo Encomenda</span></a></li>
+          <li><a href="{% url 'bdii_producao_equipamentos' %}"><i class="fas fa-cogs"></i><span class="menu-text">Produção de Equipamentos</span></a></li>
+          <li><a href="{% url 'bdii_registar_equipamento' %}"><i class="fas fa-plus"></i><span class="menu-text">Registar Equipamentos</span></a></li>
+          <li><a href="{% url 'bdii_vendas_equipamentos' %}"><i class="fas fa-shopping-cart"></i><span class="menu-text">Vendas de Equipamentos</span></a></li>
+          <li><a href="{% url 'bdii_gestao_clientes' %}"><i class="fas fa-users"></i><span class="menu-text">Gestão de Clientes</span></a></li>
+          <li><a href="{% url 'c_logout' %}"><i class="fas fa-sign-out-alt"></i><span class="menu-text">Logout</span></a></li> 
+
+        </ul>
+    </div>
+
+    <form method="post" action="{% url 'bdii_registo_encomenda' %}" id="encomendaForm">
+        {% csrf_token %}
+        <h2>Nova Encomenda</h2>
+        <label for="componentes">Componente(s):</label>
+        <div class="component-list">
+            <div class="component-item">
+                <select name="componente[]" required>
+                    {% for componente in componentes %}
+                        <option value="{{ componente.0 }}">{{ componente.1 }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="quantidade[]" placeholder="Quantidade" style="margin-left: 20px;" required min="1" required>
+                <button type="button1"  class="custom-button" style="margin-left: 20px; margin-bottom: 20px" onclick="removerComponente(this)">Remover</button>
+            </div>
+        </div>
+        <button type="button" style="margin-bottom: 20px; margin-top: -20px" onclick="adicionarComponente()">Adicionar Componente</button>
+    
+        <label for="fornecedor_id">Fornecedor:</label>
+        <select name="fornecedor_id" required>
+            {% for fornecedor in fornecedores %}
+                <option value="{{ fornecedor.0 }}">{{ fornecedor.1 }}</option>
+            {% endfor %}
+        </select><br>
+    
+        <button type="submit" id="adicionarBtn" onclick="showSuccessAlert()">Adicionar à encomenda</button>
+    </form>
+    
+    
+    <form id="faturaForm">
+        <h2>Registo da Fatura da Encomenda</h2>
+        <label for="encomenda">ID de Encomenda:</label>
+        <select name="encomenda_id" id="encomenda_id">
+            {% for encomenda in idencomenda %}
+                <option value="{{ encomenda.0 }}">{{ encomenda.0 }}</option>
+            {% endfor %}
+        </select>
+    
+        <!-- Remova a chamada fetchEncomendaData() do evento onclick -->
+        <button type="button" id="continuarButton" onclick="continuar()">Continuar</button>
+    
+        <div id="additionalFields" style="display:none;">
+            <!-- Additional fields go here -->
+            <label for="nomeFornecedor">Nome do Fornecedor:</label>
+            <input type="text" id="nomeFornecedor" name="nomeFornecedor" readonly>
+            
+            <label for="dataHora">Data/Hora Pedido:</label>
+            <input type="datetime-local" id="dataHora" name="dataHora" readonly>
+            
+            <label for="valorTotal">Valor Total:</label>
+            <input type="text" id="valorTotal" name="valorTotal" readonly>
+
+            <ul id="componentesList"></ul>
+    
+            <button type="button" onclick="guardarFatura()">Guardar</button>
+        </div>
+    </form>
+
+    <form id="guiaRemessaForm">
+        <h2>Registo da Guia de Remessa da Encomenda</h2>
+        <label for="encomenda">ID de Encomenda:</label>
+        <select name="encomenda_id" id="encomenda_id_guia">
+            {% for encomenda in idencomendaguia %}
+                <option value="{{ encomenda.0 }}">{{ encomenda.0 }}</option>
+            {% endfor %}
+        </select>
+
+        
+        <button type="button" id="continuarButtonGuia" onclick="continuarGuia()">Continuar</button>
+    
+        <div id="additionalFieldsGuia" style="display:none;">
+            <!-- Additional fields go here -->
+            <label for="nomeFornecedor">Nome do Fornecedor:</label>
+            <input type="text" id="nomeFornecedorGuia" name="nomeFornecedor" readonly>
+            
+            <label for="dataHora">Data/Hora Emissão da Guia:</label>
+            <input type="datetime-local" id="dataHoraGuia" name="dataHora" readonly>
+            
+            <label for="valorTotal">Valor Total:</label>
+            <input type="text" id="valorTotalGuia" name="valorTotal" readonly>
+
+        <ul id="componentesListGuia"></ul>
+    
+        <button type="button" onclick="guardarGuia()">Guardar</button>
+    </form>
+
+    <script>
+       function adicionarComponente() {
+            var componentesDiv = document.querySelector('.component-list');
+            var novoComponente = document.createElement('div');
+            novoComponente.className = 'component-item';
+            novoComponente.innerHTML = `
+                <select name="componente[]" required>
+                    {% for componente in componentes %}
+                         <option value="{{ componente.0 }}">{{ componente.1 }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="quantidade[]" style="margin-left: 20px;" placeholder="Quantidade" required>
+                <button type="button1"  class="custom-button" style="margin-left: 20px; margin-bottom: 20px" onclick="removerComponente(this)">Remover</button>
+            `;
+            componentesDiv.appendChild(novoComponente);
+        }
+
+        function removerComponente(button) {
+            var componenteDiv = button.parentNode;
+            componenteDiv.parentNode.removeChild(componenteDiv);
+        }
+
+        function showSuccessAlert() {
+            // Verificar se pelo menos uma quantidade foi inserida
+            var quantidades = document.getElementsByName("quantidade[]");
+            var quantidadePreenchida = false;
+
+            for (var i = 0; i < quantidades.length; i++) {
+                if (quantidades[i].value.trim() !== "") {
+                    quantidadePreenchida = true;
+                    break;
+                }
+            }
+
+            if (!quantidadePreenchida) {
+                alert('Requisitos em falta');
+                return false;
+            }
+
+            else if(quantidadePreenchida) {
+                alert('Encomanda feita com sucesso');
+                criarArquivoJSON();
+            }
+        }
+
+        function continuar() {
+            fetchEncomendaData();
+            document.getElementById("additionalFields").style.display = "block";
+            document.getElementById("continuarButton").style.display = "none";
+            document.getElementById("encomenda_id").onchange = function() {fetchEncomendaData();};
+        }
+
+        function continuarGuia() {
+            fetchGuiaData();
+            document.getElementById("additionalFieldsGuia").style.display = "block";
+            document.getElementById("continuarButtonGuia").style.display = "none";
+            document.getElementById("encomenda_id_guia").onchange = function() {fetchGuiaData();};
+        }
+
+        function fetchEncomendaData() {
+            var encomendaId = document.getElementById("encomenda_id").value;
+
+            fetch('/registo_encomenda/fetch_encomenda_data/' + encomendaId + '/')
+                .then(response => response.json())
+                .then(data => {
+                    // Update additional fields with data
+                    document.getElementById("nomeFornecedor").value = data.nomeFornecedor;
+                    document.getElementById("dataHora").value = data.dataHora;
+                    document.getElementById("valorTotal").value = data.valorTotal;
+                    
+                    // Access the componentes_info array
+                    var componentesInfo = data.componentes_info;
+                    console.log('Componentes Info:', componentesInfo);
+                    // Loop through componentes_info and update HTML elements
+                    var componentesList = document.getElementById("componentesList");
+                    componentesList.innerHTML = ""; // Clear previous content
+
+                    componentesInfo.forEach(componente => {
+                        var listItem = document.createElement("li");
+                        listItem.textContent = `Nome: ${componente[0]}, Quantidade: ${componente[1]}, Preço: ${componente[2]}`;
+                        componentesList.appendChild(listItem);
+                    });
+
+
+                    // Show the additional fields
+                    document.getElementById("additionalFields").style.display = "block";
+                })
+                .catch(error => {console.error('Error fetching encomenda data:', error), console.log('Data received:', data)});
+                document.getElementById("additionalFields").style.display = "block";
+        }
+
+        function fetchGuiaData() {
+            var encomendaIdGuia = document.getElementById("encomenda_id_guia").value;
+
+            fetch('/registo_encomenda/fetch_guia_data/' + encomendaIdGuia + '/')
+                .then(response => response.json())
+                .then(dataGuia => {
+                    // Update additional fields with data
+                    document.getElementById("nomeFornecedorGuia").value = dataGuia.nomeFornecedor;
+                    document.getElementById("dataHoraGuia").value = dataGuia.dataHora;
+                    document.getElementById("valorTotalGuia").value = dataGuia.valorTotal;
+                    
+                    // Access the componentes_info array
+                    var componentesInfo = dataGuia.componentes_info;
+                    console.log('Componentes Info:', componentesInfo);
+                    // Loop through componentes_info and update HTML elements
+                    var componentesListGuia = document.getElementById("componentesListGuia");
+                    componentesListGuia.innerHTML = ""; // Clear previous content
+
+                    componentesInfo.forEach(componente => {
+                        var listItem = document.createElement("li");
+                        listItem.textContent = `Nome: ${componente[0]}, Quantidade: ${componente[1]}, Preço: ${componente[2]}`;
+                        componentesListGuia.appendChild(listItem);
+                    });
+
+
+                    // Show the additional fields
+                    document.getElementById("additionalFieldsGuia").style.display = "block";
+                })
+                .catch(error => {console.error('Error fetching encomenda data:', error), console.log('Data received:', dataGuia)});
+                document.getElementById("additionalFieldsGuia").style.display = "block";
+        }
+
+
+    function criarArquivoJSON() {
+    var formData = document.forms.encomendaForm;
+    var jsonData = {
+        'IDcomponentes': [],
+        'Nomescomponentes': [], 
+        'quantidades': [],
+        'fornecedor_id': formData.querySelector('[name="fornecedor_id"]').value,
+    };
+
+    // Iterate through the componentes and quantidades fields
+    var componentesFields = formData.querySelectorAll('[name^="componente["]');
+    var quantidadesFields = formData.querySelectorAll('[name^="quantidade["]');
+
+    componentesFields.forEach(function (componenteField, index) {
+        jsonData.IDcomponentes.push(componenteField.value);
+
+        // Fetch the corresponding name based on the selected ID
+        var selectedOption = componenteField.options[componenteField.selectedIndex];
+        var componentName = selectedOption.textContent;
+        jsonData.Nomescomponentes.push(componentName);
+    });
+
+    quantidadesFields.forEach(function (quantidadeField, index) {
+        jsonData.quantidades.push(quantidadeField.value);
+    });
+
+    // Display component names and supplier name
+    var componentNames = jsonData.Nomescomponentes;
+    var supplierField = formData.querySelector('[name="fornecedor_id"]');
+    var supplierName = supplierField.options[supplierField.selectedIndex].textContent;
+
+    var displayText = 'Selected Components: ' + componentNames.join(', ') + '<br>Supplier: ' + supplierName;
+
+    // Display or use `displayText` as needed, for example, append it to an HTML element
+    var displayElement = document.getElementById('displayArea');
+    if (displayElement) {
+        displayElement.innerHTML = displayText;
+    }
+
+    // The rest of your code remains unchanged...
+    var jsonString = JSON.stringify(jsonData);
+    var blob = new Blob([jsonString], { type: 'application/json' });
+
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'encomenda_data.json';
+    a.click();
+}
+
+function guardarFatura() {
+    var encomendaId = document.getElementById("encomenda_id").value;
+    var nomeFornecedor = document.getElementById("nomeFornecedor").value;
+    var valorTotal = document.getElementById("valorTotal").value;
+
+    var data = {
+        encomenda_id: encomendaId,
+        nome_fornecedor: nomeFornecedor,
+        valor_total: valorTotal
+    };
+
+    // Include CSRF token in the headers
+    var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+    fetch('/registo_encomenda/guardar_fatura/' + encomendaId + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // Include CSRF token
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        // Handle the response as needed
+        console.log(result);
+        if (result.success) {
+            // Display a success message
+            alert('Fatura registada com sucesso!');
+        } else {
+            // Display an error message
+            alert('A Fatura em questão já se encontra registada!');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving data:', error);
+    });
+}
+
+function guardarGuia() {
+    var encomendaIdGuia = document.getElementById("encomenda_id_guia").value;
+    var nomeFornecedorGuia = document.getElementById("nomeFornecedorGuia").value;
+    var valorTotalGuia = document.getElementById("valorTotalGuia").value;
+
+    var dataGuia = {
+        encomenda_id: encomendaIdGuia,  
+        nome_fornecedor: nomeFornecedorGuia, 
+        valor_total: valorTotalGuia
+    };
+
+    // Include CSRF token in the headers
+    var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+    fetch('/registo_encomenda/guardar_guia/' + encomendaIdGuia + '/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken // Include CSRF token
+        },
+        body: JSON.stringify(dataGuia)
+    })
+    .then(responseGuia => responseGuia.json())
+    .then(resultGuia => {
+        // Handle the response as needed
+        console.log(resultGuia);
+        if (resultGuia.success) {
+            // Display a success message
+            alert('Guia registada com sucesso!');
+        } else {
+            // Display an error message
+            alert('Erro no registo da guia!');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving data:', error);
+    });
+}
+
+
+
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+  <title>Lista de Clientes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: #fff;
+    }
+
+    
+    .container {
+      max-width: 700px;
+      max-height: 500px;
+      margin: 20px auto;
+    }
+
+    .client-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .client-item {
+      background-color: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.3s;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .client-item:hover {
+      background-color: #f1f1f1;
+    }
+
+    .details-button {
+      background-color: #3498db;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .remove-button {
+      background-color: #e03535;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .details-button:hover {
+      background-color: #03548b;
+    }
+    
+    .remove-button:hover {
+      background-color: #6b0707;
+    }
+
+    .confirmation-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 140px; 
+    border-radius: 8px;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #3498db;
+}
+
+.confirmation-box {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+    .removebox-button {
+      background-color: #e03535;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cancelbox-button {
+      background-color: #3498db;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .removebox-button:hover {
+      background-color: #6b0707;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .cancelbox-button:hover {
+      background-color: #03548b;
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .client-details {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-130%, -20%);
+    margin-top: 50px; /* Adjust this value as needed */
+    background-color: #fff;
+    width: 25%;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: left;
+    border: 2px solid #3498db;
+}
+
+    .client-details h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .client-details p {
+      margin: 8px 0;
+    }
+    .client-details button {
+      background-color:#3498db; 
+      color: #fff;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .client-details button:hover {
+      background-color: #03548b; 
+    }
+
+    /* sidebar */
+
+    .sidebar {
+      height: 100%;
+      width: 90px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #184060;
+      overflow-x: hidden;
+      padding-top: 20px;
+      transition: 0.5s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .sidebar:hover {
+      width: 250px;
+    }
+
+    .menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .menu-text {
+      display: none; /* Hide text content by default */
+    }
+
+    .menu a {
+      text-decoration: none;
+      color: white;
+      padding: 27px;
+      display: flex;
+      align-items: center;
+      transition: 0.3s;
+    }
+
+    .menu i {
+      margin-right: 10px; /* Add some space between icon and text */
+      display: inline; /* Show icons */
+    }
+
+    .menu a:hover {
+      background-color: rgba(57, 91, 141, 0.973);
+    }
+
+    .sidebar:hover .menu-text {
+      display: inline; /* Show text content on sidebar hover */
+    }
+
+    .user-profile {
+      text-align: center;
+      color: #e8e8e8;
+      padding-bottom: 20px;
+    }
+
+    .user-profile img {
+      width: 50px;
+      border-radius: 50%;
+    }
+
+  
+  </style>
+</head>
+<body>
+
+    <div class="container">
+      <ul class="client-list">
+          {% for cliente in clientes %}
+              <li class="client-item" data-id="{{ cliente.0 }}" data-nome="{{ cliente.1 }}" data-endereco="{{ cliente.2 }}" data-telefone="{{ cliente.3 }}" data-email="{{ cliente.4 }}" data-contribuinte="{{ cliente.5 }}">
+                  <span>{{ cliente.1 }}</span>
+                  <div>
+                      <button class="details-button" onclick="showDetails(this)">Detalhes</button>
+                      <button class="remove-button" onclick="showConfirmation('{{ cliente.0 }}', '{{ cliente.1 }}')">Remover</button>
+
+                  </div>
+              </li>
+          {% endfor %}
+      </ul>
+    </div>
+  
+
+  <div class="sidebar" id="sidebar">
+    <div class="user-profile">
+      <i class="fas fa-user"></i>
+      <p>Welcome, {{ user_name }}</p>
+    </div>
+    <ul class="menu">
+      <li><a href="{% url 'bdii_dashboard' %}"><i class="fas fa-chart-line"></i><span class="menu-text">Dashboard</span></a></li>
+          <li><a href="{% url 'bdii_registo_encomenda' %}"><i class="fas fa-clipboard-list"></i><span class="menu-text">Registo Encomenda</span></a></li>
+          <li><a href="{% url 'bdii_producao_equipamentos' %}"><i class="fas fa-cogs"></i><span class="menu-text">Produção de Equipamentos</span></a></li>
+          <li><a href="{% url 'bdii_registar_equipamento' %}"><i class="fas fa-plus"></i><span class="menu-text">Registar Equipamentos</span></a></li>
+          <li><a href="{% url 'bdii_vendas_equipamentos' %}"><i class="fas fa-shopping-cart"></i><span class="menu-text">Vendas de Equipamentos</span></a></li>
+          <li style="background-color: #1f6797;"><a href="{% url 'bdii_gestao_clientes' %}"><i class="fas fa-users"></i><span class="menu-text">Gestão de Clientes</span></a></li>
+          <li><a href="{% url 'c_logout' %}"><i class="fas fa-sign-out-alt"></i><span class="menu-text">Logout</span></a></li> 
+    </ul>
+  </div>
+
+  <div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-box">
+        <input type="hidden" id="clientIdInput">
+        <p>Tem certeza que deseja remover o cliente <span id="clientNameConfirmation"></span>?</p>
+        <button class="removebox-button" onclick="removeClient()">Sim</button>
+        <button class="cancelbox-button" onclick="hideConfirmation()">Não</button>
+    </div>
+</div>
+
+  <!-- Detalhes do Cliente -->
+  <div class="client-details" id="clientDetails">
+    <h2>Detalhes do Cliente</h2>
+    <p><strong>Nome:</strong> <span id="clientName"></span></p>
+    <p><strong>Endereco:</strong> <span id="clientEndereco"></span></p>
+    <p><strong>Telefone:</strong> <span id="clientTelefone"></span></p>
+    <p><strong>Email:</strong> <span id="clientEmail"></span></p>
+    <p><strong>Contribuinte:</strong> <span id="clienteContribuinte"></span></p>
+
+    <p><strong>Encomendas do Cliente:</strong></p>
+    <ul id="clientesList">
+        <!-- Aqui você vai preencher dinamicamente com os idvendaheader e os equipamentos -->
+    </ul>
+
+    <button onclick="hideDetails()">Fechar</button>
+  </div>
+
+<script>
+  function showDetails(button) {
+    const listItem = button.closest('.client-item');
+    const clientDetails = document.getElementById('clientDetails');
+
+    const clientNome = listItem.dataset.nome;
+    const clientEndereco = listItem.dataset.endereco;
+    const clientTelefone = listItem.dataset.telefone;
+    const clientEmail = listItem.dataset.email;
+    const clienteContribuinte = listItem.dataset.contribuinte;
+
+    document.getElementById('clientName').innerText = clientNome;
+    document.getElementById('clientEndereco').innerText = clientEndereco;
+    document.getElementById('clientTelefone').innerText = clientTelefone;
+    document.getElementById('clientEmail').innerText = clientEmail;
+    document.getElementById('clienteContribuinte').innerText = clienteContribuinte;
+
+    var client_id = listItem.dataset.id;
+
+    fetch('/gestao_clientes/fetch_encomendas_cliente/' + client_id + '/')
+        .then(response => response.json())
+        .then(data => {
+            console.log('idvendaheader_list:', data.idvendaheader_list);
+            console.log('componentes_info_dict:', data.componentes_info_dict);
+
+            var idvendaheaderList = data.idvendaheader_list;
+            var clientesList = document.getElementById("clientesList");
+            clientesList.innerHTML = ""; // Limpar conteúdo anterior
+
+            idvendaheaderList.forEach(idvendaheader => {
+                var idvendaheaderItem = document.createElement("li");
+                idvendaheaderItem.textContent = `Número da Venda: ${idvendaheader}`;
+                clientesList.appendChild(idvendaheaderItem);
+
+                var componentes_info_list = data.componentes_info_dict[idvendaheader];
+
+                if (componentes_info_list && componentes_info_list.length > 0) {
+                    var componentesList = document.createElement("ul");
+
+                    componentes_info_list.forEach(componente => {
+                        var componenteItem = document.createElement("li");
+                        componenteItem.textContent = `Descrição: ${componente[0]}, Quantidade: ${componente[1]}, Preço: ${componente[2]}`;
+                        componentesList.appendChild(componenteItem);
+                    });
+
+                    idvendaheaderItem.appendChild(componentesList);
+                } else {
+                    var noComponentesItem = document.createElement("li");
+                    noComponentesItem.textContent = "Nenhum componente associado a esta venda.";
+                    idvendaheaderItem.appendChild(noComponentesItem);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Erro ao buscar os dados:', error);
+        });
+
+    // Set the position to the right of the client list
+    const clientListRect = listItem.getBoundingClientRect();
+    clientDetails.style.left = `${clientListRect.right + 10}px`; // Ajustar o valor conforme necessário
+    // Exibir a seção de detalhes do cliente
+    clientDetails.style.display = 'block';
+}
+
+
+
+  function hideDetails() {
+    // Ocultar a seção de detalhes do cliente
+    document.getElementById('clientDetails').style.display = 'none';
+  }
+
+ function showConfirmation(clientId, clientName) {
+    // Display the confirmation modal
+    document.getElementById('confirmationModal').style.display = 'block';
+
+    // Set client details in the modal
+    document.getElementById('clientIdInput').value = clientId;
+    document.getElementById('clientNameConfirmation').innerText = clientName;
+}
+
+function hideConfirmation() {
+    // Hide the confirmation modal
+    document.getElementById('confirmationModal').style.display = 'none';
+}
+
+function removeClient() {
+    // Get the client ID from the hidden input
+    const clientId = document.getElementById('clientIdInput').value;
+
+   
+        // Navigate to the Django view URL for deleting the client
+        window.location.href = `/delete-cliente/${clientId}/`;  // Update with your Django URL
+
+
+    // Hide the confirmation modal
+    hideConfirmation();
+}
+</script>
+
+</body>
+</html>

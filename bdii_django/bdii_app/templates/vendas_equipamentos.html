@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <title>Registo de Vendas</title>
+  <style>
+    form {
+            max-width: 600px;
+            margin: 0 auto;
+            margin-left: 160px;
+        }
+
+        label, input, select {
+            display: block;
+            margin-bottom: 10px;
+        }
+        /*-----------------------------------------------------------*/
+        .equipment-list {
+            margin-top: 10px;
+        }
+        /*-----------------------------------------------------------*/
+        .equipment-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section h2 {
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #03548b;
+    }
+
+    .history-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .history-item {
+      background-color: #f9f9f9;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    .history-item:hover {
+      background-color: #eaeaea;
+    }
+
+    .eye-icon {
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+
+/* Side bar */
+
+.sidebar {
+            height: 100%;
+            width: 90px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #184060;
+            overflow-x: hidden;
+            padding-top: 20px;
+            transition: 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-text {
+            display: none; /* Hide text content by default */
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: white;
+            padding: 27px;
+            display: flex;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .menu i {
+            margin-right: 10px; /* Add some space between icon and text */
+            display: inline; /* Show icons */
+        }
+
+        .menu a:hover {
+            background-color: rgba(57, 91, 141, 0.973);
+        }
+
+        .sidebar:hover .menu-text {
+            display: inline; /* Show text content on sidebar hover */
+        }
+
+        .user-profile {
+            text-align: center;
+            color: #e8e8e8;
+            padding-bottom: 20px;
+        }
+
+        .user-profile img {
+            width: 50px;
+            border-radius: 50%;
+        }
+
+        .user-profile img {
+            width: 50px;
+            border-radius: 50%;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        select[multiple] {
+        height: auto !important;
+        }
+
+         option:checked::before {
+        content: '\2193'; /* Código unicode para uma seta para baixo */
+        margin-right: 5px;
+        
+        }
+
+        .selected-options {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+  </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <div class="user-profile">
+          <i class="fas fa-user"></i>
+          <p>Welcome, {{ user_name }}</p>
+      </div>
+          <ul class="menu">
+            <li><a href="{% url 'bdii_dashboard' %}"><i class="fas fa-chart-line"></i><span class="menu-text">Dashboard</span></a></li>
+            <li><a href="{% url 'bdii_registo_encomenda' %}"><i class="fas fa-clipboard-list"></i><span class="menu-text">Registo Encomenda</span></a></li>
+            <li><a href="{% url 'bdii_producao_equipamentos' %}"><i class="fas fa-cogs"></i><span class="menu-text">Produção de Equipamentos</span></a></li>
+            <li><a href="{% url 'bdii_registar_equipamento' %}"><i class="fas fa-plus"></i><span class="menu-text">Registar Equipamentos</span></a></li>
+            <li style="background-color: #1f6797;"><a href="{% url 'bdii_vendas_equipamentos' %}"><i class="fas fa-shopping-cart"></i><span class="menu-text">Vendas de Equipamentos</span></a></li>
+            <li><a href="{% url 'bdii_gestao_clientes' %}"><i class="fas fa-users"></i><span class="menu-text">Gestão de Clientes</span></a></li>
+            <li><a href="{% url 'c_logout' %}"><i class="fas fa-sign-out-alt"></i><span class="menu-text">Logout</span></a></li> 
+
+          </ul>
+      </div>
+      
+      <form method="post" action="{% url 'bdii_vendas_equipamentos' %}" onsubmit="submitForm()">
+        <hr>
+        {% csrf_token %}
+        <h2>Registo das Vendas</h2>
+        <label for="emailCliente">Email do Cliente:</label>
+        <select name="emailCliente" id="emailCliente" required onchange = "fetchRegistoVenda()">
+          <option value="" selected disabled>Escolha um Cliente</option>
+          {% for email in emailCliente %}
+            <option value="{{ email.0 }}">{{ email.0 }}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" id="selectedEmail" name="selectedEmail">
+      
+        <!-- Additional fields go here -->
+        <div id="additionalFields" style="display:none;"></div>
+        <label for="idCliente">ID do Cliente:</label>
+        <input type="text" id="idCliente" name="idCliente" readonly>
+      
+        <label for="nomeCliente">Nome do Cliente:</label>
+        <input type="text" id="nomeCliente" name="nomeCliente" readonly>
+      
+        <label for="telefoneCliente">Telefone do Cliente:</label>
+        <input type="text" id="telefoneCliente" name="telefoneCliente" readonly>
+      
+        <hr>
+        <!-- Equipamentos -->
+        <a>Equipamento(s):</a>
+        <ul id="equipamentosList"></ul>
+        </div>
+
+        <button type="submit" id="adicionarBtn">Adicionar Registo de Venda</button>
+      </form>
+
+
+      <form id="faturaForm">
+        <hr>
+        <h2>Envio da Fatura para o Cliente</h2>
+        <label for="fatura">ID da Venda:</label>
+        <select name="fatura_id" id="fatura_id">
+            {% for venda in vendasId %}
+                <option value="{{ venda.0 }}">{{ venda.0 }}</option>
+            {% endfor %}
+        </select>
+    
+        <button type="button" id="continuarButton" onclick="continuar()">Continuar</button>
+    
+        <div id="additionalFieldsFatura" style="display:none;">
+            <!-- Additional fields go here -->
+            <label for="nomeClienteFatura">Nome do Cliente:</label>
+            <input type="text" id="nomeClienteFatura" name="nomeClienteFatura" readonly>
+
+            <label for="emailClienteFatura">Email do Cliente:</label>
+            <input type="text" id="emailClienteFatura" name="emailClienteFatura" readonly>
+  
+            <label for="moradaCliente">Morada do Cliente:</label>
+            <input type="text" id="moradaCliente" name="moradaCliente" readonly>
+
+            <label for="dataHora">Data/Hora Pedido:</label>
+            <input type="datetime-local" id="dataHora" name="dataHora" readonly>
+
+            <label for="valorTotal">Valor Total(€):</label>
+            <input type="text" id="valorTotal" name="valorTotal" readonly>
+
+            <a>Equipamento(s):</a>
+            <ul id="equipamentosFaturaList"></ul>
+
+            <button type="button" onclick="guardar_fatura_cliente()">Guardar</button>
+        </div>
+      </form>
+
+      <form id="guiaRemessaForm">
+        <h2>Registo da Guia de Remessa da Venda</h2>
+        <label for="venda">ID da Venda:</label>
+        <select name="venda_id" id="venda_id_guia">
+            {% for venda in vendasGuiaId %}
+                <option value="{{ venda.0 }}">{{ venda.0 }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="button" id="continuarButtonGuia" onclick="continuarGuia()">Continuar</button>
+    
+        <div id="additionalFieldsGuia" style="display:none;">
+            <!-- Additional fields go here -->
+            <label for="nomeClienteGuia">Nome do Cliente:</label>
+            <input type="text" id="nomeClienteGuia" name="nomeClienteGuia" readonly>
+            
+            <label for="valorTotalGuia">Valor Total(€):</label>
+            <input type="text" id="valorTotalGuia" name="valorTotalGuia" readonly>
+
+            <label for="emailClienteGuia">Email do Cliente:</label>
+            <input type="text" id="emailClienteGuia" name="emailClienteGuia" readonly>
+  
+            <label for="moradaClienteGuia">Morada do Cliente:</label>
+            <input type="text" id="moradaClienteGuia" name="moradaClienteGuia" readonly>
+            
+            <a>Equipamento(s):</a>
+            <ul id="equipamentosListGuia"></ul>
+        
+            <button type="button" onclick="guardarGuia()">Guardar</button>
+        </div>
+    </form>
+
+  <script>
+        function submitForm() {
+            var selectedEmail = document.getElementById("emailCliente").value;
+            var idCliente = document.getElementById("idCliente").value;
+            var nomeCliente = document.getElementById("nomeCliente").value;
+            var telefoneCliente = document.getElementById("telefoneCliente").value;
+        
+            document.getElementById("selectedEmail").value = selectedEmail;
+            document.getElementById("idCliente").value = idCliente;
+            document.getElementById("nomeCliente").value = nomeCliente;
+            document.getElementById("telefoneCliente").value = telefoneCliente;
+        }
+      
+        function continuar() {
+          fetch_fatura_venda_data();
+            document.getElementById("additionalFieldsFatura").style.display = "block";
+            document.getElementById("continuarButton").style.display = "none";
+            document.getElementById("fatura_id").onchange = function() {fetch_fatura_venda_data();};
+        }
+
+        function continuarGuia() {
+            fetchGuiaData();
+            document.getElementById("additionalFieldsGuia").style.display = "block";
+            document.getElementById("continuarButtonGuia").style.display = "none";
+            document.getElementById("venda_id_guia").onchange = function() {fetchGuiaData();};
+        }
+
+        function fetchRegistoVenda() {
+            var emailCliente = document.getElementById("emailCliente").value;
+            console.log('Fetching data for emailCliente:', emailCliente);
+
+            fetch('/vendas_equipamentos/fetch_registo_venda/' + emailCliente + '/')
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Erro na requisição. Status: ' + response.status);
+                }
+                return response.json();
+              })
+              .then(data => {
+                console.log('Dados recebidos:', data);
+
+                if (!data || !data.dadosCliente) {
+                  throw new Error('Dados do cliente não foram recebidos corretamente.');
+                }
+
+            document.getElementById("idCliente").value = data.dadosCliente[0][0];
+            document.getElementById("nomeCliente").value = data.dadosCliente[0][1];
+            document.getElementById("telefoneCliente").value = data.dadosCliente[0][2];
+
+            var equipamentosList = document.getElementById("equipamentosList");
+            var noEquipmentsMessage = document.getElementById("noEquipmentsMessage");
+            var equipamentosInfo = data.dadosequipamento;
+
+            var equipamentosList = document.getElementById("equipamentosList");
+            equipamentosList.innerHTML = ""; // Clear previous content
+
+            equipamentosInfo.forEach(equipamento => {
+              var listItem = document.createElement("li");
+              listItem.textContent = `Descrição: ${equipamento[0]}, Quantidade: ${equipamento[1]}, Valor: ${equipamento[2]}`;
+              equipamentosList.appendChild(listItem);
+            });
+          
+            // Show the additional fields
+            document.getElementById("additionalFields").style.display = "block";
+
+                  })
+                  .catch(error => console.error('Error fetching venda data:', error));
+        }
+        
+        function fetch_fatura_venda_data() {
+            var venda_id = document.getElementById("fatura_id").value;
+
+            fetch('/vendas_equipamentos/fetch_fatura_venda_data/' + venda_id + '/')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Dados recebidos:', data);
+                    // Update additional fields with data
+                    document.getElementById("nomeClienteFatura").value = data.dadosCliente[0][0]; // Primeiro elemento do primeiro array
+                    document.getElementById("emailClienteFatura").value = data.dadosCliente[0][1]; // Segundo elemento do primeiro array
+                    document.getElementById("moradaCliente").value = data.dadosCliente[0][2]; // Terceiro elemento do primeiro array
+                    document.getElementById("dataHora").value = data.dadosCliente[0][3];
+                    document.getElementById("valorTotal").value = data.valorTotal;
+                    
+                    // Access the componentes_info array
+                    var equipamentosFaturaInfo = data.equipamentos_info;
+                    var equipamentosFaturaList = document.getElementById("equipamentosFaturaList");
+                    equipamentosFaturaList.innerHTML = ""; // Clear previous content
+
+                    equipamentosFaturaInfo.forEach(equipamento => {
+                        var listItem = document.createElement("li");
+                        listItem.textContent = `Descrição: ${equipamento[0]}, Quantidade: ${equipamento[1]}, Preço: ${equipamento[2]}`;
+                        equipamentosFaturaList.appendChild(listItem);
+                    });
+
+
+                    // Show the additional fields
+                    document.getElementById("additionalFields").style.display = "block";
+                })
+                .catch(error => {console.error('Error fetching venda data:', error), console.log('Data received:', data)});
+                document.getElementById("additionalFields").style.display = "block";
+        }
+
+        function guardar_fatura_cliente() {
+            var venda_id = document.getElementById("fatura_id").value;
+            var nomeCliente = document.getElementById("nomeClienteFatura").value;
+            var valor_total = document.getElementById("valorTotal").value;
+
+            var data = {
+                venda_id: venda_id,
+                nomeCliente: nomeCliente,
+                valor_total: valor_total
+            };
+
+            // Include CSRF token in the headers
+            var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+            fetch('/vendas_equipamentos/guardar_fatura_cliente/' + venda_id + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Include CSRF token
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Handle the response as needed
+                console.log(result);
+                if (result.success) {
+                    // Display a success message
+                    alert('Fatura registada com sucesso!');
+                } else {
+                    // Display an error message
+                    alert('A Fatura em questão já se encontra registada!');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving data:', error);
+            });
+        }
+        //está por fazer
+        function fetchGuiaData() {
+            var venda_id = document.getElementById("venda_id_guia").value;
+
+            fetch('/vendas_equipamentos/fetch_fatura_venda_data/' + venda_id + '/')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Dados recebidos:', data);
+                    // Update additional fields with data
+                    document.getElementById("nomeClienteGuia").value = data.dadosCliente[0][0]; // Primeiro elemento do primeiro array
+                    document.getElementById("emailClienteGuia").value = data.dadosCliente[0][1]; // Segundo elemento do primeiro array
+                    document.getElementById("moradaClienteGuia").value = data.dadosCliente[0][2]; // Terceiro elemento do primeiro array
+                    document.getElementById("valorTotalGuia").value = data.valorTotal;
+                    
+                    // Access the componentes_info array
+                    var equipamentosGuiaInfo = data.equipamentos_info;
+                    var equipamentosGuiaList = document.getElementById("equipamentosListGuia");
+                    equipamentosGuiaList.innerHTML = ""; // Clear previous content
+
+                    equipamentosGuiaInfo.forEach(equipamento => {
+                        var listItem = document.createElement("li");
+                        listItem.textContent = `Descrição: ${equipamento[0]}, Quantidade: ${equipamento[1]}, Preço: ${equipamento[2]}`;
+                        equipamentosGuiaList.appendChild(listItem);
+                    });
+
+                
+                    // Show the additional fields
+                    document.getElementById("additionalFieldsGuia").style.display = "block";
+                })
+                .catch(error => {console.error('Error fetching venda data:', error), console.log('Data received:', data)});
+                document.getElementById("additionalFieldsGuia").style.display = "block";
+        }
+
+        //está por fazer
+        function guardarGuia() {
+            var vendaIdGuia = document.getElementById("venda_id_guia").value;
+            var nomeClienteGuia = document.getElementById("nomeClienteGuia").value;
+            var valorTotalGuia = document.getElementById("valorTotalGuia").value;
+
+            var dataGuia = {
+                nomeClienteGuia: nomeClienteGuia, 
+                valorTotalGuia: valorTotalGuia
+            };
+
+            // Include CSRF token in the headers
+            var csrfToken = document.getElementsByName("csrfmiddlewaretoken")[0].value;
+
+            fetch('/vendas_equipamentos/guardar_guia_fatura/' + vendaIdGuia + '/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken // Include CSRF token
+                },
+                body: JSON.stringify(dataGuia)
+            })
+            .then(responseGuia => responseGuia.json())
+            .then(resultGuia => {
+                // Handle the response as needed
+                console.log(resultGuia);
+                if (resultGuia.success) {
+                    // Display a success message
+                    alert('Guia registada com sucesso!');
+                } else {
+                    // Display an error message
+                    alert('Erro no registo da guia!');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving data:', error);
+            });
+        }
+  
+  </script>
+</body>
+</html>

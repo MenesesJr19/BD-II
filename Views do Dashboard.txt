@@ -1,0 +1,1297 @@
+è preciso alterar a tabela armazem e retirar a data de entrada e saida
+Alterar a tabela componeneteArmazem e adicionar data de entra e saida
+
+CREATE VIEW componente_saida_stock_recente AS
+SELECT
+    C.nome AS nome_componente,
+    C.quantidade AS quantidade_componente,
+    A.nome AS nome_armazem,
+    CA.data_saida
+FROM
+    ComponenteArmazem CA
+JOIN Componentes C ON CA.componenteID = C.ID
+JOIN Armazem A ON CA.id_armazem = A.ID_armazem
+WHERE
+    CA.data_saida IS NOT NULL
+ORDER BY
+    CA.data_saida DESC
+LIMIT 10;
+
+CREATE VIEW componente_entrada_stock_recente AS
+SELECT
+    C.nome AS nome_componente,
+    C.quantidade AS quantidade_componente,
+    A.nome AS nome_armazem,
+    CA.data_entrada
+FROM
+    ComponenteArmazem CA
+JOIN Componentes C ON CA.componenteID = C.ID
+JOIN Armazem A ON CA.id_armazem = A.ID_armazem
+WHERE
+    CA.data_saida IS NOT NULL
+ORDER BY
+    CA.data_saida DESC
+LIMIT 10;
+
+
+//esta view não estava bem era só para conseguir abrir a pagina dashboard
+//usar esta para substituir a view anterior
+CREATE VIEW equipamento_entrada_stock_recente AS
+SELECT
+    E.tipo AS tipo_equipamento,
+    E.descricao AS descricao_equipamento,
+    A.nome AS nome_armazem,
+    EA.data_entrada
+FROM
+    EquipamentoArmazem EA
+JOIN equipamento E ON EA.equipamentoID = E.id_equipamento
+JOIN Armazem A ON EA.id_armazem = A.ID_armazem
+WHERE
+    EA.data_entrada IS NOT NULL
+ORDER BY
+    EA.data_entrada DESC
+LIMIT 10;
+
+
+
+INSERT INTO ComponenteArmazem (componenteID, id_armazem, data_entrada, data_saida)
+VALUES
+    (6, 1, '2024-01-01', '2024-01-05'), 
+    (7, 1, '2024-01-02', '2024-01-06'), 
+    (8, 1, '2024-01-04', '2024-01-08'), 
+    (9, 1, '2024-01-05', '2024-01-09'), 
+    (10, 1, '2024-01-05', '2024-01-09'), 
+    (11, 1, '2024-01-06', '2024-01-10'),
+	(12, 1, '2024-01-04', '2024-01-08'), 
+    (13, 1, '2024-01-05', '2024-01-09'), 
+    (14, 1, '2024-01-05', '2024-01-09'), 
+    (15, 1, '2024-01-06', '2024-01-10'),
+	(16, 1, '2024-01-04', '2024-01-08'), 
+    (17, 1, '2024-01-05', '2024-01-09'), 
+    (18, 1, '2024-01-04', '2024-01-08'), 
+    (19, 1, '2024-01-05', '2024-01-09'), 
+    (20, 1, '2024-01-06', '2024-01-10');
+
+Criar esta tabela no PGAdmin
+
+CREATE TABLE EquipamentoArmazem (
+    equipamentoID INT,
+    id_armazem INT,
+    data_entrada DATE,
+    data_saida DATE,
+    FOREIGN KEY (equipamentoID) REFERENCES equipamento(id_equipamento),
+    FOREIGN KEY (id_armazem) REFERENCES Armazem(ID_armazem)
+);
+
+
+INSERT INTO EquipamentoArmazem (equipamentoID, id_armazem, data_entrada, data_saida)
+VALUES
+    (1, 2, '2024-01-01', '2024-01-05'), 
+    (2, 2, '2024-01-02', '2024-01-06'), 
+    (3, 2, '2024-01-04', '2024-01-08'), 
+    (4, 2, '2024-01-05', '2024-01-09'), 
+    (5, 2, '2024-01-05', '2024-01-09');
+
+
+Insert INTO tipooperacao (id, descricao)
+Values
+(1, 'Montagem de board'),
+(2, 'Montagem de ram'),
+(3, 'Montagem de GPU'),
+(4, 'Montagem Completa'),
+(5, 'Instalação de Periféricos'),
+(6, 'Embalagem');
+
+
+Insert Into maoobra (id, tipo, custo)
+Values
+(1, 'Operador de 1a', 40.50),
+(2, 'Operador de 2a',  35.50),
+(3, 'Embalador', 25.50),
+(4, 'Técnico de Montagem', 59.50),
+(5, 'Técnico de Manutenção', 36.50);
+
+CREATE VIEW vw_tipo_operacao AS
+SELECT * FROM tipooperacao;
+
+CREATE VIEW vw_mao_obra AS
+SELECT * FROM maoobra;
+
+Corram isto no PGADMIN
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO aluno3_a
+    REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM aluno3_c;
+    GRANT ALL PRIVILEGES ON TABLE public.equipamento TO aluno3_c;   
+
+//Tem de criar esta view se não o dashboard nao funciona
+CREATE VIEW equipamento_saida_stock_recente AS
+SELECT
+    E.tipo AS tipo_equipamento,
+    E.descricao AS descricao_equipamento,
+    A.nome AS nome_armazem,
+    EA.data_saida
+FROM
+    EquipamentoArmazem EA
+JOIN equipamento E ON EA.equipamentoID = E.id_equipamento
+JOIN Armazem A ON EA.id_armazem = A.ID_armazem
+WHERE
+    EA.data_saida IS NOT NULL
+ORDER BY
+    EA.data_saida DESC
+LIMIT 10;
+
+
+//Modificações DIA 28
+//Usar esta table para substituir a que tem no pgadmin (ComponentesFichaProducao)
+CREATE TABLE ComponentesFichaProducao (
+    Id SERIAL PRIMARY KEY,
+    idcomponente INT,
+    quantidadeComponente INT,
+    id_tipooperacao INT,
+    id_maodeobra INT,
+    datahorainicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    datahorafim TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '15 minutes'),
+    FOREIGN KEY (id_tipooperacao) REFERENCES tipooperacao(ID),
+    FOREIGN KEY (id_maodeobra) REFERENCES maoobra(ID),
+    FOREIGN KEY (idcomponente) REFERENCES componentes(ID),
+  	UNIQUE (id, idcomponente)
+);
+
+//substituir esta função para o ecrâ Produção Equipamentos funcionar
+CREATE OR REPLACE FUNCTION insert_componentes_ficha_producao(
+    p_idcomponentes INT[],
+    p_quantidadeComponente INT,
+    p_id_tipooperacao INT,
+    p_id_maodeobra INT
+)
+RETURNS VOID AS
+$$
+DECLARE
+    idcomponente_element INT;
+BEGIN
+    -- Get the array length
+    FOR i IN 1..array_length(p_idcomponentes, 1)
+    LOOP
+        -- Retrieve the idcomponente at index i
+        idcomponente_element := p_idcomponentes[i];
+
+        -- Insert into the table
+       INSERT INTO ComponentesFichaProducao (id, idcomponente, quantidadeComponente, id_tipooperacao, id_maodeobra) 
+        VALUES (NEXTVAL('componentesfichaproducao_id_seq'), idcomponente_element, p_quantidadeComponente, p_id_tipooperacao, p_id_maodeobra);
+    END LOOP;
+EXCEPTION
+    WHEN others THEN
+        -- Raise an exception with the error message
+        RAISE EXCEPTION 'Error in insert_componentes_ficha_producao: %', SQLERRM;
+END;
+$$
+LANGUAGE plpgsql;
+
+GRANT USAGE, SELECT ON SEQUENCE componentesfichaproducao_id_seq TO aluno3_a;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO aluno3_a;
+
+
+--------------- DIA 30/01 ---------------------
+Update este trigger:
+Foi removida a linha 'data_entrada = CURRENT_DATE'
+
+BEGIN
+   
+    UPDATE Armazem
+    SET quantidade_em_stock = quantidade_em_stock + NEW.quantidade
+    WHERE ID_armazem = 1;
+
+    RETURN NEW;
+END;
+
+--Tabela modificada adicionada linha quantidade INT,
+CREATE TABLE ComponenteArmazem (
+    componenteID INT,
+    id_armazem INT,
+	quantidade INT,
+    data_entrada DATE,
+    data_saida DATE,
+    FOREIGN KEY (componenteID) REFERENCES Componentes(ID),
+    FOREIGN KEY (id_armazem) REFERENCES Armazem(ID_armazem)
+);
+
+
+--  Substituir after_insert_componentes() por esta
+CREATE OR REPLACE FUNCTION after_insert_componentes()
+RETURNS TRIGGER AS $$
+DECLARE
+    quantidade_componente INT;
+BEGIN
+    SELECT quantidade INTO quantidade_componente FROM Componentes WHERE ID = NEW.ID;
+    INSERT INTO ComponenteArmazem (componenteID, id_armazem, quantidade, data_entrada)
+    VALUES (NEW.ID, 1, quantidade_componente, CURRENT_DATE);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_insert_componentes_trigger
+AFTER INSERT ON Componentes
+FOR EACH ROW
+EXECUTE FUNCTION after_insert_componentes();
+
+
+-- Neste trigger componente_entrada_stock_recente foi retirado a linha "WHERE
+    CA.data_saida IS NOT NULL" e modificada 
+    a linha  "ORDER BY ca.data_saida DESC" para "ORDER BY ca.data_entrada DESC"
+    Também foi adicionada a linha WHERE
+
+CREATE OR REPLACE VIEW componente_entrada_stock_recente
+ AS
+ SELECT c.nome AS nome_componente,
+    c.quantidade AS quantidade_componente,
+    a.nome AS nome_armazem,
+    ca.data_entrada
+   FROM componentearmazem ca
+     JOIN componentes c ON ca.componenteid = c.id
+     JOIN armazem a ON ca.id_armazem = a.id_armazem
+  WHERE ca.data_entrada >= (CURRENT_DATE - '2 days'::interval)
+  ORDER BY ca.data_entrada DESC
+ LIMIT 10;
+
+
+--Apagar o trigger update_stock_apos_compra_fornecedor e substituir por esta --
+--Armazem sempre a atualizar --
+ CREATE OR REPLACE FUNCTION update_armazem_quantidade()
+RETURNS TRIGGER AS $$
+DECLARE
+    total_quantidade INT;
+BEGIN
+    -- Calculate the total quantity of components in ComponenteArmazem for the specific armazem
+    SELECT COALESCE(SUM(quantidade), 0) INTO total_quantidade
+    FROM Componentearmazem
+    WHERE id_armazem = NEW.id_armazem;
+
+    -- Update the Armazem table with the calculated total quantity
+    UPDATE Armazem
+    SET quantidade_em_stock = total_quantidade
+    WHERE ID_armazem = NEW.id_armazem;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for AFTER INSERT on ComponenteArmazem
+CREATE TRIGGER after_insert_componente_armazem
+AFTER INSERT OR UPDATE OR DELETE ON Componentearmazem
+FOR EACH ROW
+EXECUTE FUNCTION update_armazem_quantidade();
+
+
+
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO aluno3_a;
+
+
+----DIA 01 Fevereiro ---
+
+--Criar esta table para controlar cada Lista de Produção
+CREATE TABLE ProducaoHeader (
+    Id SERIAL PRIMARY KEY
+);
+
+-- Usar este Alter para alterar a tabela ComponentesFichaProducao(vai adicionar uma row importantissima)
+ALTER TABLE ComponentesFichaProducao
+ADD COLUMN id_producao_header INT,
+ADD CONSTRAINT fk_producao_header
+    FOREIGN KEY (id_producao_header)
+    REFERENCES ProducaoHeader(Id);
+
+--A tabela dps desses comandos vai ficar assim
+CREATE TABLE ComponentesFichaProducao (
+    Id SERIAL PRIMARY KEY,
+    idcomponente INT,
+    quantidadeComponente INT,
+    id_tipooperacao INT,
+    id_maodeobra INT,
+    datahorainicio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    datahorafim TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '15 minutes'),
+    id_producao_header INT,  -- New field for the foreign key reference to ProducaoHeader
+    FOREIGN KEY (id_tipooperacao) REFERENCES tipooperacao(ID),
+    FOREIGN KEY (id_maodeobra) REFERENCES maoobra(ID),
+    FOREIGN KEY (idcomponente) REFERENCES componentes(ID),
+    FOREIGN KEY (id_producao_header) REFERENCES ProducaoHeader(Id),  -- New foreign key
+  	UNIQUE (id, idcomponente)
+);
+
+-- Modifiquei a função insert_componentes_ficha_producao, Podem apagar a anterior e colocar esta
+CREATE OR REPLACE FUNCTION insert_componentes_ficha_producao(
+    p_idcomponentes INT[],
+    p_quantidadeComponente INT,
+    p_id_tipooperacao INT,
+    p_id_maodeobra INT,
+    p_id_producao_header INT 
+)
+RETURNS VOID AS
+$$
+DECLARE
+    idcomponente_element INT;
+BEGIN
+    -- Get the array length
+    FOR i IN 1..array_length(p_idcomponentes, 1)
+    LOOP
+        -- Retrieve the idcomponente at index i
+        idcomponente_element := p_idcomponentes[i];
+
+        -- Insert into the ComponentesFichaProducao table
+        INSERT INTO ComponentesFichaProducao (id, idcomponente, quantidadeComponente, id_tipooperacao, id_maodeobra, id_producao_header) 
+        VALUES (NEXTVAL('componentesfichaproducao_id_seq'), idcomponente_element, p_quantidadeComponente, p_id_tipooperacao, p_id_maodeobra, p_id_producao_header);
+
+        -- Update the ComponenteArmazem table by subtracting 1 from quantidade and updating data_saida
+        UPDATE ComponenteArmazem
+        SET quantidade = quantidade - 1,
+            data_saida = CURRENT_DATE  -- You can adjust this based on your requirement
+        WHERE componenteID = idcomponente_element;
+    END LOOP;
+EXCEPTION
+    WHEN others THEN
+        -- Raise an exception with the error message
+        RAISE EXCEPTION 'Error in insert_componentes_ficha_producao: %', SQLERRM;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Dar grant outra vez
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO aluno3_a;
+GRANT USAGE, SELECT ON SEQUENCE producaoheader_id_seq TO aluno3_a;
+
+-- view para mostrar mes e ano em que houve componentes a entrar ou a sair do componentearmazem
+CREATE OR REPLACE VIEW view_meses_anos_componentearmazem AS
+SELECT DISTINCT
+    EXTRACT(MONTH FROM data_entrada) AS mes,
+    EXTRACT(YEAR FROM data_entrada) AS ano
+FROM componentearmazem
+UNION
+SELECT DISTINCT
+    EXTRACT(MONTH FROM data_saida) AS mes,
+    EXTRACT(YEAR FROM data_saida) AS ano
+FROM componentearmazem;
+
+-- é preciso instalar isto, correr no vscode
+pip install pandas openpyxl
+
+-- estas duas views precisam de ser alteradas para que a quantidade seja aquela associada com o tipo de movimento 
+-- entrada/saida
+CREATE OR REPLACE VIEW view_componentes_armazem_entrada AS
+SELECT
+    c.nome AS nome_componente,
+    c.preco AS preco_componente,
+    ca.quantidade,
+    ca.data_entrada,
+    ca.id_armazem
+FROM
+    componentes c
+JOIN
+    componentearmazem ca ON c.id = ca.componenteid
+	
+	
+CREATE OR REPLACE VIEW view_componentes_armazem_saida AS
+SELECT
+    c.nome AS nome_componente,
+    c.preco AS preco_componente,
+    ca.quantidade,
+    ca.data_saida,
+    ca.id_armazem
+FROM
+    componentes c
+JOIN
+    componentearmazem ca ON c.id = ca.componenteid
+
+
+    ---Corram isto no pgadmin para alterar a View low_stock_components
+    CREATE OR REPLACE VIEW public.low_stock_components AS
+SELECT c.nome, ce.quantidade
+FROM Componentes c
+JOIN Componentearmazem ce ON c.ID = ce.componenteID
+WHERE ce.quantidade <= 10
+ORDER BY ce.quantidade;
+
+ALTER TABLE public.low_stock_components
+OWNER TO postgres;
+
+GRANT ALL ON TABLE public.low_stock_components TO aluno3_a;
+GRANT ALL ON TABLE public.low_stock_components TO postgres;
+
+
+-- Apagar a componente_saida_stock_recente anterior e adicionar esta
+CREATE VIEW componente_saida_stock_recente AS
+SELECT
+    C.nome AS nome_componente,
+    (C.quantidade - CA.quantidade) AS quantidade_componente,
+    A.nome AS nome_armazem,
+    CA.data_saida
+FROM
+    ComponenteArmazem CA
+JOIN Componentes C ON CA.componenteID = C.ID
+JOIN Armazem A ON CA.id_armazem = A.ID_armazem
+WHERE
+    CA.data_saida IS NOT NULL
+ORDER BY
+    CA.data_saida DESC
+LIMIT 10;
+
+
+--Criar tabelas
+CREATE TABLE Encomenda_componentesHeader (
+    Id SERIAL PRIMARY KEY
+);
+CREATE TABLE PedidoDeCompra (
+    Id SERIAL PRIMARY KEY,
+	componenteID INT,
+	quantidadeComponente INTEGER,
+	fornecedor_id INTEGER,
+    datahora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_Encomenda_componentesHeader INT,
+	FOREIGN KEY (componenteID) REFERENCES Componentes(ID),
+    FOREIGN KEY (fornecedor_id) REFERENCES Fornecedor(ID),
+	FOREIGN KEY (id_Encomenda_componentesHeader) REFERENCES Encomenda_componentesHeader(ID), 
+  	UNIQUE (id, componenteID)
+);
+
+-- Criar função
+CREATE OR REPLACE FUNCTION insert_componentes_pedido_compra(
+    p_idcomponentes INT[],
+    p_quantidades INT[],
+    p_fornecedor_id INTEGER,
+    p_id_Encomenda_componentesHeader INT
+)
+RETURNS VOID AS
+$$
+DECLARE
+    idcomponente_element INT;
+    quantidade_element INT;
+BEGIN
+    -- Verificar se os arrays têm o mesmo comprimento
+    IF array_length(p_idcomponentes, 1) <> array_length(p_quantidades, 1) THEN
+        RAISE EXCEPTION 'Arrays de comprimentos diferentes';
+    END IF;
+
+    -- Iterar sobre os arrays simultaneamente
+    FOR i IN 1..array_length(p_idcomponentes, 1)
+    LOOP
+        -- Obter os elementos correspondentes dos arrays
+        idcomponente_element := p_idcomponentes[i];
+        quantidade_element := p_quantidades[i];
+
+        -- Inserir na tabela PedidoDeCompra
+        INSERT INTO PedidoDeCompra (componenteID, quantidadeComponente, fornecedor_id, datahora, id_Encomenda_componentesHeader) 
+        VALUES (idcomponente_element, quantidade_element, p_fornecedor_id, CURRENT_TIMESTAMP, p_id_Encomenda_componentesHeader);
+    END LOOP;
+EXCEPTION
+    WHEN others THEN
+        -- Levantar uma exceção com a mensagem de erro
+        RAISE EXCEPTION 'Erro em insert_componentes_pedido_compra: %', SQLERRM;
+END;
+$$
+LANGUAGE plpgsql;
+
+-----------------
+insert into Encomenda_componentesHeader(Id)
+values (1);
+
+CREATE TABLE Encomenda_componentesHeader (
+    Id SERIAL PRIMARY KEY
+);
+
+CREATE TABLE PedidoDeCompra (
+    Id SERIAL PRIMARY KEY,
+    componenteID INT,
+    quantidadeComponente INT,
+    fornecedor_id INT,
+    datahora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_Encomenda_componentesHeader INT,
+    FOREIGN KEY (componenteID) REFERENCES Componentes(ID),
+    FOREIGN KEY (fornecedor_id) REFERENCES Fornecedor(ID),
+    FOREIGN KEY (id_Encomenda_componentesHeader) REFERENCES Encomenda_componentesHeader(ID)
+);
+
+CREATE OR REPLACE FUNCTION insert_componentes_pedido_compra(
+    p_idcomponentes integer[],
+    p_quantidades integer[],
+    p_fornecedor_id integer,
+    p_id_Encomenda_componentesHeader integer
+)
+RETURNS VOID AS
+$$
+DECLARE
+    idcomponente_element INT;
+    quantidade_element INT;
+BEGIN
+    -- Verificar se os arrays têm o mesmo comprimento
+    IF array_length(p_idcomponentes, 1) <> array_length(p_quantidades, 1) THEN
+        RAISE EXCEPTION 'Arrays de comprimentos diferentes';
+    END IF;
+
+    -- Iterar sobre os arrays simultaneamente
+    FOR i IN 1..array_length(p_idcomponentes, 1)
+    LOOP
+        -- Obter os elementos correspondentes dos arrays
+        idcomponente_element := p_idcomponentes[i];
+        quantidade_element := p_quantidades[i];
+
+        -- Inserir na tabela PedidoDeCompra
+        INSERT INTO PedidoDeCompra (componenteID, quantidadeComponente, fornecedor_id, datahora, id_Encomenda_componentesHeader) 
+        VALUES (idcomponente_element, quantidade_element, p_fornecedor_id, CURRENT_TIMESTAMP, p_id_Encomenda_componentesHeader);
+    END LOOP;
+EXCEPTION
+    WHEN others THEN
+        -- Levantar uma exceção com a mensagem de erro
+        RAISE EXCEPTION 'Erro em insert_componentes_pedido_compra: %', SQLERRM;
+END;
+$$
+LANGUAGE plpgsql;
+
+-----------------
+
+CREATE OR REPLACE VIEW dados_fornecedor AS
+SELECT id, nome
+FROM fornecedor;
+
+CREATE OR REPLACE VIEW dados_componentes AS
+SELECT id, nome
+FROM componentes;
+
+
+-- Criar para o Registo de equipamento
+CREATE VIEW vw_componentes_ProducaoHeader AS
+SELECT id
+FROM ProducaoHeader;
+
+
+CREATE OR REPLACE VIEW vw_componentes_by_producao_header AS
+SELECT
+    cf.id,
+    c.nome,
+    c.descricao,
+    c.preco,
+    cf.id_producao_header  
+FROM
+    ComponentesFichaProducao cf
+JOIN
+    componentes c ON cf.idcomponente = c.id
+JOIN
+    ProducaoHeader ph ON cf.id_producao_header = ph.id;  
+	
+	
+----Esta view foi alterada
+CREATE OR REPLACE VIEW id_encomenda
+ AS
+ SELECT DISTINCT ON (id_encomenda_componentesheader)
+ 	id_encomenda_componentesheader
+   FROM pedidodecompra;
+   
+----Esta função é usada para mostrar os valores na fatura ao selecionar o id
+CREATE OR REPLACE FUNCTION nomeFornecedorDadoIDenc(encomenda_id integer)
+RETURNS character varying
+AS $$
+DECLARE
+    fornecedor_nome character varying;
+BEGIN
+    SELECT f.nome
+    INTO fornecedor_nome
+    FROM pedidodecompra p
+    JOIN fornecedor f ON p.fornecedor_id = f.id
+    WHERE p.id_encomenda_componentesheader = encomenda_id
+    LIMIT 1;
+
+    RETURN fornecedor_nome;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION datahoraDadoIdEnc(encomenda_id integer)
+RETURNS timestamp without time zone
+AS $$
+DECLARE
+    datahora_encomenda timestamp without time zone;
+BEGIN
+    SELECT datahora
+    INTO datahora_encomenda
+    FROM pedidodecompra
+    WHERE id_encomenda_componentesheader = encomenda_id
+    ORDER BY id DESC
+    LIMIT 1;
+
+    RETURN datahora_encomenda;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION calcular_valor_total_encomenda(encomenda_id integer)
+RETURNS numeric(10,2)
+AS $$
+DECLARE
+    valor_total numeric(10,2) := 0;
+    componente_info RECORD;
+BEGIN
+    -- Criar um cursor para os componentes associados à encomenda
+    FOR componente_info IN
+        SELECT c.preco, p.quantidadecomponente
+        FROM componentes c
+        JOIN pedidodecompra p ON c.id = p.componenteid
+        WHERE p.id_encomenda_componentesheader = encomenda_id
+    LOOP
+        -- Somar o preço multiplicado pela quantidade ao valor_total
+        valor_total := valor_total + (componente_info.preco * componente_info.quantidadecomponente);
+    END LOOP;
+
+    RETURN valor_total;
+END;
+$$ LANGUAGE plpgsql;
+
+---- Alterar a tabela, adicionei tipo, descricao, valor_total e retirei a FOREIGN key equipamentoID
+CREATE TABLE EquipamentoArmazem (
+    equipamentoID INT,
+    id_armazem INT,
+    data_entrada DATE,
+    data_saida DATE,
+    tipo VARCHAR(255),  
+    descricao VARCHAR(255),  
+    valor_total DECIMAL(10, 2),
+	quantidade INT,
+    FOREIGN KEY (id_armazem) REFERENCES Armazem(ID_armazem)
+);
+
+
+--Criei este procedimento para  tratar de Criar o equipamento
+
+CREATE OR REPLACE PROCEDURE InsertEquipamentoArmazemWithTotal(
+    IN p_ficha_producao_id INT,
+    IN p_tipo VARCHAR(255),
+    IN p_descricao VARCHAR(255)
+)
+AS $$
+-- Set the fixed value for ID_armazem and default quantity
+DECLARE 
+    v_id_armazem INT DEFAULT 2;
+    v_quantidade INT DEFAULT 1;
+    
+-- Declare variables to store calculated values
+v_component_price DECIMAL(10, 2);
+v_maodeobra_price DECIMAL(10, 2);
+v_valor_total DECIMAL(10, 2);
+v_maodeobra_id INT;
+
+BEGIN
+    -- Retrieve the component price based on the given p_ficha_producao_id
+    SELECT COALESCE(SUM(comp.preco), 0) INTO v_component_price
+    FROM vw_componentes_by_producao_header comp
+    WHERE comp.id_producao_header = p_ficha_producao_id;
+
+    -- Retrieve the id_maodeobra from ComponentesFichaProducao
+    SELECT id_maodeobra INTO v_maodeobra_id
+    FROM ComponentesFichaProducao
+    WHERE id_producao_header = p_ficha_producao_id;
+
+    -- Retrieve the maodeobra price based on the obtained id_maodeobra
+    SELECT COALESCE(custo, 0) INTO v_maodeobra_price
+    FROM MaoObra
+    WHERE id = v_maodeobra_id;
+
+    -- Calculate the total value
+    v_valor_total := v_component_price + v_maodeobra_price;
+
+    -- Insert into EquipamentoArmazem with fixed quantity as 1
+    INSERT INTO EquipamentoArmazem (
+        equipamentoID,
+        id_armazem,
+        data_entrada,
+        tipo,
+        descricao,
+        quantidade,
+        valor_total
+    )
+    VALUES (
+        p_ficha_producao_id,
+        v_id_armazem,
+        CURRENT_DATE,  -- Assuming you want to use the current date for data_entrada
+        p_tipo,
+        p_descricao,
+        v_quantidade,
+        v_valor_total
+    );
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apagar a Função marcar_como_pronto_para_armazenar() e get_equipamentos_prontos_para_armazenar() do PGadmin
+
+-- Adicionar esta view para tratar da filtragem posterior do ID da produçao
+CREATE VIEW vw_EquipamentoArmazem_Ids AS
+SELECT equipamentoID
+FROM EquipamentoArmazem;
+
+--Adicionar este trigger para dar update á quantidade_em_Stock dos equips da table Armazem
+
+CREATE OR REPLACE FUNCTION update_equipamento_armazem_quantidade()
+RETURNS TRIGGER AS $$
+DECLARE
+    total_quantidade INT;
+BEGIN
+    -- Calculate the total quantity of equipamentos in EquipamentoArmazem for the specific armazem
+    SELECT COALESCE(SUM(quantidade), 0) INTO total_quantidade
+    FROM EquipamentoArmazem
+    WHERE id_armazem = NEW.id_armazem;
+
+    -- Update the Armazem table with the calculated total quantity
+    UPDATE Armazem
+    SET quantidade_em_stock = total_quantidade
+    WHERE ID_armazem = NEW.id_armazem;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger for AFTER INSERT, UPDATE, or DELETE on EquipamentoArmazem
+CREATE TRIGGER after_insert_update_delete_equipamento_armazem
+AFTER INSERT OR UPDATE OR DELETE ON EquipamentoArmazem
+FOR EACH ROW
+EXECUTE FUNCTION update_equipamento_armazem_quantidade();
+
+-------------------------------------------------------
+-- FUNCTION: public.obter_info_componentes_encomenda(integer)
+
+-- DROP FUNCTION IF EXISTS public.obter_info_componentes_encomenda(integer);
+
+CREATE OR REPLACE FUNCTION obter_info_componentes_encomenda(id_encomenda integer)
+RETURNS TABLE (
+    nome_componente character varying(255),
+    quantidade integer,
+    preco numeric(10,2)
+)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.nome, pc.quantidadecomponente, c.preco
+    FROM componentes c
+    JOIN pedidodecompra pc ON c.id = pc.componenteid
+    WHERE pc.id_encomenda_componentesheader = id_encomenda;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Alterem as views para a Entrada e Saída de stock recente
+-- saida
+CREATE VIEW equipamento_saida_stock_recente AS
+SELECT
+    EA.tipo AS tipo_equipamento,
+    EA.descricao AS descricao_equipamento,
+    A.nome AS nome_armazem,
+    EA.data_saida
+FROM
+    EquipamentoArmazem EA
+JOIN Armazem A ON EA.id_armazem = A.ID_armazem
+WHERE
+    EA.data_saida IS NOT NULL
+    AND EA.data_saida >= CURRENT_DATE - INTERVAL '2' DAY
+ORDER BY
+    EA.data_saida DESC
+LIMIT 10;
+
+-- entrada
+CREATE VIEW equipamento_entrada_stock_recente AS
+SELECT
+    EA.tipo AS tipo_equipamento,
+    EA.descricao AS descricao_equipamento,
+    A.nome AS nome_armazem,
+    EA.data_entrada
+FROM
+    EquipamentoArmazem EA
+JOIN Armazem A ON EA.id_armazem = A.ID_armazem
+WHERE
+    EA.data_entrada IS NOT NULL
+    AND EA.data_entrada >= CURRENT_DATE - INTERVAL '2' DAY
+ORDER BY
+    EA.data_entrada DESC
+LIMIT 10;
+
+
+
+CREATE OR REPLACE FUNCTION public.inserir_fatura(p_valor_total numeric, p_id_encomenda integer)
+RETURNS integer AS
+$$
+DECLARE
+    v_id_fatura integer;
+BEGIN
+    INSERT INTO public.faturacompras (valor_total, id_encomenda)
+    VALUES (p_valor_total, p_id_encomenda)
+    RETURNING id_fatura INTO v_id_fatura;
+
+    RETURN v_id_fatura;
+END;
+$$
+LANGUAGE plpgsql;
+
+--View para obter emailCliente
+
+CREATE OR REPLACE VIEW obter_emailCliente AS
+SELECT email
+FROM cliente;
+
+///////////////////////////////////////////////
+--Função obter
+CREATE OR REPLACE FUNCTION obter_cliente_por_email(email_cliente character varying)
+RETURNS TABLE (id integer, nome character varying, telefone character varying) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT id, nome, telefone
+    FROM cliente
+    WHERE email = email_cliente;
+END;
+$$ LANGUAGE plpgsql;
+
+
+-- Apagar a tabela FaturaCompras e criar esta
+CREATE TABLE FaturaCompras (
+    ID_fatura SERIAL PRIMARY KEY,
+    id_encomenda INT,
+    nome_fornecedor VARCHAR(255),
+    datahoraEmissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    valor_total DECIMAL(10, 2),
+    FOREIGN KEY (id_encomenda) REFERENCES encomenda_componentesheader (id)
+);
+
+CREATE OR REPLACE FUNCTION inserir_fatura(
+    p_id_encomenda INT,
+    p_nome_fornecedor VARCHAR(255),
+    p_valor_total DECIMAL(10, 2)
+)
+RETURNS VOID AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM FaturaCompras WHERE id_encomenda = p_id_encomenda) THEN
+        INSERT INTO FaturaCompras (id_encomenda, nome_fornecedor, valor_total)
+        VALUES (p_id_encomenda, p_nome_fornecedor, p_valor_total);
+    ELSE
+        RAISE EXCEPTION 'A fatura com o mesmo id_encomenda já existe.';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+-----------------------
+
+CREATE TABLE TipoEquipamento (
+    ID_tipo_equipamento SERIAL PRIMARY KEY,
+    tipo VARCHAR(255) NOT NULL
+);
+----------
+INSERT INTO TipoEquipamento (tipo) VALUES ('Portátil');
+INSERT INTO TipoEquipamento (tipo) VALUES ('Computador Fixo');
+INSERT INTO TipoEquipamento (tipo) VALUES ('Impressora');
+INSERT INTO TipoEquipamento (tipo) VALUES ('Rato');
+INSERT INTO TipoEquipamento (tipo) VALUES ('Cadeira Gaming');
+INSERT INTO TipoEquipamento (tipo) VALUES ('Webcam');
+-----------
+CREATE VIEW vw_tipos_equipamento AS
+SELECT * FROM TipoEquipamento;
+
+-------------Modificar esta função
+CREATE OR REPLACE FUNCTION obter_cliente_por_email(email_cliente character varying)
+RETURNS TABLE (cliente_id integer, cliente_nome character varying, cliente_telefone character varying) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT id AS cliente_id, nome AS cliente_nome, telefone AS cliente_telefone
+    FROM cliente
+    WHERE email = email_cliente;
+END;
+$$ LANGUAGE plpgsql
+
+-- Usar este comando
+ALTER TABLE EquipamentoArmazem ADD PRIMARY KEY (equipamentoID);
+----
+
+CREATE TABLE pedido_clienteHeader  (
+    Id SERIAL PRIMARY KEY
+);
+-----
+CREATE TABLE PedidoCompraCliente (
+    ID SERIAL PRIMARY KEY,
+    clienteID INT,
+    equipamentoID INT,
+    datahora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_pedido_clienteHeader INT,
+    enderecoEntrega VARCHAR(255),
+    valor_total DECIMAL(10, 2),
+    FOREIGN KEY (clienteID) REFERENCES Cliente(ID),
+    FOREIGN KEY (equipamentoID) REFERENCES EquipamentoArmazem(equipamentoID),
+    FOREIGN KEY (id_pedido_clienteHeader) REFERENCES pedido_clienteHeader(Id),
+	UNIQUE (id, equipamentoID )
+);
+
+-- Criar esta Tabela
+CREATE TABLE Vendas_Header (
+    VendaID SERIAL PRIMARY KEY
+)
+
+-- Criar tbm esta Tabela
+CREATE TABLE Vendas (
+    ID SERIAL PRIMARY KEY,
+    ClienteID INT,
+    EquipamentoID INT,
+    DescricaoEquipamento VARCHAR(255),
+    Quantidade INT,
+	VendaHeaderID INT,
+    ValorTotal DECIMAL(10, 2),
+    datahora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (ClienteID) REFERENCES Cliente(ID),
+    FOREIGN KEY (EquipamentoID) REFERENCES EquipamentoArmazem(equipamentoID),
+    FOREIGN KEY (VendaHeaderID) REFERENCES Vendas_Header(VendaID),
+	UNIQUE (ID, EquipamentoID )
+);
+
+--Criar Função
+CREATE OR REPLACE FUNCTION insert_into_vendas(
+    p_ClienteID INT,
+    p_EquipamentoID INT,
+    p_DescricaoEquipamento VARCHAR(255),
+    p_Quantidade INT,
+    p_VendaHeaderID INT
+)
+RETURNS VOID AS $$
+DECLARE
+    v_ValorTotal DECIMAL(10, 2);
+    v_VendaHeaderID INT;
+BEGIN
+    -- Calculate the ValorTotal by fetching the value from EquipamentoArmazem
+    SELECT valor_total 
+    INTO v_ValorTotal
+    FROM EquipamentoArmazem
+    WHERE equipamentoid = p_EquipamentoID;
+
+    -- If p_VendaHeaderID is provided, use it; otherwise, get the latest VendaHeaderID
+    IF p_VendaHeaderID IS NOT NULL THEN
+        v_VendaHeaderID := p_VendaHeaderID;
+    ELSE
+        SELECT COALESCE(MAX(VendaHeaderID), 0) + 1
+        INTO v_VendaHeaderID
+        FROM Vendas;
+    END IF;
+
+    -- Insert data into Vendas table
+    INSERT INTO Vendas (ClienteID, EquipamentoID, DescricaoEquipamento, Quantidade, VendaHeaderID, ValorTotal)
+    VALUES (p_ClienteID, p_EquipamentoID, p_DescricaoEquipamento, p_Quantidade, v_VendaHeaderID, v_ValorTotal);
+END;
+$$ LANGUAGE plpgsql;
+
+-- Comandos para Limpar
+
+Delete from EquipamentoArmazem
+Delete from PedidoCompraCliente
+Delete from ComponentesFichaProducao 
+ALTER SEQUENCE producaoheader_id_seq RESTART WITH 1;
+
+--Usar estes comandos para guardar o pedido de compra, TENHAM em conta que é preciso ter equipamentos com OS IDS DE BAIXO!!
+--executar este comando
+ INSERT INTO pedido_clienteHeader DEFAULT VALUES RETURNING id;
+ -Depois executar este
+INSERT INTO PedidoCompraCliente (clienteID, equipamentoID, id_pedido_clienteHeader, enderecoEntrega, valor_total)
+VALUES 
+    (2, 1, (SELECT Id FROM pedido_clienteHeader ORDER BY Id DESC LIMIT 1), 'Endereço de Entrega', 100.00),
+    (2, 2, (SELECT Id FROM pedido_clienteHeader ORDER BY Id DESC LIMIT 1), 'Endereço de Entrega', 120.00);
+
+--rodar este comando outra vez
+    INSERT INTO pedido_clienteHeader DEFAULT VALUES RETURNING id;
+    --Depois voltar a inserir uma nova linha
+INSERT INTO PedidoCompraCliente (clienteID, equipamentoID, id_pedido_clienteHeader, enderecoEntrega, valor_total)
+VALUES 
+    (3, 3, (SELECT Id FROM pedido_clienteHeader ORDER BY Id DESC LIMIT 1), 'Endereço de Entrega', 153.00),
+    (3, 4, (SELECT Id FROM pedido_clienteHeader ORDER BY Id DESC LIMIT 1), 'Endereço de Entrega', 120.00);
+
+------Criar Função
+    CREATE OR REPLACE FUNCTION get_pedido_info(cliente_email VARCHAR(255))
+RETURNS TABLE (
+    equipamento_descricao VARCHAR(255),
+    equipamento_quantidade INT,
+    valor_total DECIMAL(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        ea.descricao AS equipamento_descricao,
+        ea.quantidade AS equipamento_quantidade,
+        pc.valor_total
+    FROM
+        PedidoCompraCliente pc
+    JOIN
+        EquipamentoArmazem ea ON pc.equipamentoID = ea.equipamentoID
+    JOIN
+        Cliente c ON pc.clienteID = c.ID
+    WHERE
+        c.email = cliente_email;
+END;
+$$ LANGUAGE plpgsql;
+
+-------- Modificar esta função (podem apagar a que têm e adicionar esta), para mostrar a lista de componentes em stock corretamente na Produção
+CREATE OR REPLACE FUNCTION get_componentes_data_function()
+RETURNS TABLE (
+    componenteID INT,
+    nome VARCHAR(255),
+    descricao TEXT,
+    preco DECIMAL(10, 2),
+    quantidade INT
+)
+AS $$
+BEGIN
+    RETURN QUERY 
+        SELECT 
+            ca.componenteID,
+            c.nome,
+            c.descricao,
+            c.preco,
+            ca.quantidade
+        FROM 
+            ComponenteArmazem ca
+        JOIN 
+            Componentes c ON ca.componenteID = c.ID
+        WHERE 
+            ca.quantidade > 0;
+END;
+$$ LANGUAGE plpgsql;
+
+
+--- Ter esta tabela
+CREATE TABLE GuiaRemessaCompra (
+    Id_remessa SERIAL PRIMARY KEY,
+	Id_encomenda INT,
+    nome_fornecedor VARCHAR(255),
+    valor_total DECIMAL(10, 2),
+    FOREIGN KEY (nome_fornecedor) REFERENCES Fornecedor(nome),
+	FOREIGN KEY (id_encomenda) REFERENCES encomenda_componentesheader (id)
+);
+
+---Criar esta função para inserir a guia na tabela
+CREATE OR REPLACE FUNCTION insert_into_guia_remessa_compra(
+    p_Id_encomenda INT,
+    p_nome_fornecedor VARCHAR(255),
+    p_valor_total DECIMAL(10, 2)
+)
+RETURNS VOID AS
+$$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM GuiaRemessaCompra WHERE Id_encomenda = p_Id_encomenda) THEN
+        INSERT INTO GuiaRemessaCompra (Id_encomenda, nome_fornecedor, valor_total)
+        VALUES (p_Id_encomenda, p_nome_fornecedor, p_valor_total);
+    ELSE
+ 
+        RAISE NOTICE 'Guia with Id_encomenda % already exists. No insertion performed.', p_Id_encomenda;
+      
+    END IF;
+END;
+$$
+LANGUAGE plpgsql;
+
+----- Isto é o trigger para modificar a quantidade na tabela ComponentesArmazem baseado no ID
+CREATE OR REPLACE FUNCTION update_componente_quantidade_trigger()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF EXISTS (SELECT 1 FROM GuiaRemessaCompra WHERE Id_encomenda = NEW.id_encomenda) THEN
+        UPDATE componentearmazem AS ca
+        SET quantidade = quantidade + pc.quantidadeComponente
+        FROM PedidoDeCompra AS pc
+        WHERE ca.componenteID = pc.componenteID
+          AND pc.id_Encomenda_componentesHeader = NEW.id_encomenda;
+    END IF;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Cria o trigger
+CREATE TRIGGER guia_remessa_trigger
+AFTER INSERT ON GuiaRemessaCompra
+FOR EACH ROW
+EXECUTE FUNCTION update_componente_quantidade_trigger();
+
+
+----------faturavenda---------Esta tabela foi alterada
+CREATE TABLE faturavendas
+(
+    id_fatura SERIAL PRIMARY KEY,
+    id_venda integer,
+    nome_cliente character varying(255),
+    datahoraemissao timestamp,
+    valor_total numeric(10,2)
+)
+------------
+CREATE OR REPLACE FUNCTION calcular_valor_total_venda(venda_header_id INT)
+RETURNS DECIMAL(10, 2) AS $$
+DECLARE
+    valor_total DECIMAL(10, 2) := 0;
+    venda_info RECORD;
+BEGIN
+    -- Criar um cursor para as vendas associadas ao VendaHeaderID
+    FOR venda_info IN
+        SELECT v.quantidade, e.valor_unitario
+        FROM vendas v
+        INNER JOIN equipamento e ON v.equipamentoid = e.id_equipamento
+        WHERE v.VendaHeaderID = venda_header_id
+    LOOP
+        -- Somar o preço total da venda ao valor_total
+        valor_total := valor_total + (venda_info.quantidade * venda_info.valor_unitario);
+    END LOOP;
+
+    RETURN valor_total;
+END;
+$$ LANGUAGE plpgsql;
+-------------Esta view foi alterada
+CREATE OR REPLACE VIEW venda_header_ids AS
+SELECT DISTINCT VendaHeaderID
+FROM vendas
+WHERE VendaHeaderID NOT IN (SELECT id_venda FROM faturavendas);
+------------
+CREATE OR REPLACE FUNCTION obter_info_equipamentos_venda(venda_header_id INT)
+RETURNS TABLE (
+    descricao_equipamento TEXT,
+    quantidade INT,
+    preco NUMERIC(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT e.descricao, v.quantidade, e.valor_unitario
+    FROM vendas v
+    INNER JOIN equipamento e ON v.equipamentoid = e.id_equipamento
+    WHERE v.VendaHeaderID = venda_header_id;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION inserir_fatura_venda(p_id_venda INTEGER, p_nome_cliente VARCHAR(255), p_valor_total NUMERIC(10,2))
+RETURNS VOID AS $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM faturavendas WHERE id_venda = p_id_venda) THEN
+        INSERT INTO faturavendas (id_venda, nome_cliente, datahoraemissao, valor_total)
+        VALUES (p_id_venda, p_nome_cliente, CURRENT_TIMESTAMP, p_valor_total);
+    ELSE
+        RAISE EXCEPTION 'A fatura com o mesmo id_venda já existe.';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+----------Esta view foi alterada
+CREATE OR REPLACE VIEW venda_header_ids AS
+SELECT DISTINCT VendaHeaderID
+FROM vendas
+WHERE VendaHeaderID NOT IN (SELECT id_venda FROM guiaremessacomprascliente);
+
+----------Esta tabela foi alterada-----------
+CREATE TABLE guiaremessacomprascliente
+(
+    id_remessa SERIAL PRIMARY KEY,
+    id_venda integer,
+    nome_cliente character varying(255),
+    valor_total integer
+)
+
+-----------
+CREATE OR REPLACE FUNCTION inserir_guia_cliente(
+    p_id_venda INT,
+    p_nome_cliente VARCHAR(255),
+    p_valor_total DECIMAL(10,2)
+)
+RETURNS VOID AS
+$$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM guiaremessacomprascliente WHERE id_venda = p_id_venda) THEN
+        INSERT INTO guiaremessacomprascliente (id_venda, nome_cliente, valor_total)
+        VALUES (p_id_venda, p_nome_cliente, p_valor_total);
+    ELSE
+        RAISE EXCEPTION 'A guia com o mesmo id_venda já existe.';
+    END IF;
+END;
+$$
+LANGUAGE plpgsql;
+
+-----------
+CREATE OR REPLACE FUNCTION update_equipamento_quantidade()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF EXISTS (SELECT 1 FROM guiaremessacomprascliente WHERE id_venda = NEW.id_venda) THEN
+        UPDATE EquipamentoArmazem AS ea
+        SET quantidade = quantidade - pc.quantidade,
+            data_saida = CURRENT_DATE
+        FROM PedidoCompraCliente AS pc
+        WHERE ea.equipamentoID = pc.equipamentoID
+          AND pc.id_pedido_clienteHeader = NEW.id_venda;
+    END IF;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER after_inserir_guia_cliente_trigger
+AFTER INSERT ON guiaremessacomprascliente
+FOR EACH ROW
+EXECUTE FUNCTION update_equipamento_quantidade();
+
+--------Views para registo_encomenda
+CREATE OR REPLACE VIEW id_encomenda AS
+SELECT DISTINCT id_encomenda_componentesheader
+FROM pedidodecompra
+WHERE id_encomenda_componentesheader NOT IN (SELECT id_encomenda FROM faturacompras);
+
+CREATE OR REPLACE VIEW id_encomenda_guia AS
+SELECT DISTINCT id_encomenda
+FROM faturacompras
+WHERE id_encomenda NOT IN (SELECT id_encomenda FROM guiaremessacompra);
+
+---------------
+CREATE OR REPLACE FUNCTION obter_idvendaheader_por_cliente(id_cliente INT)
+RETURNS SETOF INT AS
+$$
+DECLARE
+    idvendaheader INT;
+BEGIN
+    FOR idvendaheader IN
+        SELECT DISTINCT v.VendaHeaderID
+        FROM vendas v
+        INNER JOIN guiaremessacomprascliente g ON v.VendaHeaderID = g.id_venda
+        WHERE v.ClienteID = id_cliente
+    LOOP
+        RETURN NEXT idvendaheader;
+    END LOOP;
+
+    RETURN;
+END;
+$$
+LANGUAGE plpgsql;
+
+-------Esta funcao estava mal, substituir por esta
+CREATE OR REPLACE FUNCTION obter_info_equipamentos_venda(venda_header_id INT)
+RETURNS TABLE (
+    descricao_equipamento VARCHAR(255),
+    quantidade INT,
+    preco NUMERIC(10, 2)
+) AS $$
+BEGIN
+    RETURN QUERY 
+    SELECT v.descricaoequipamento, v.quantidade, v.valortotal
+    FROM vendas v
+    WHERE v.VendaHeaderID = venda_header_id;
+END;
+$$ LANGUAGE plpgsql;
+
+---------------
+CREATE OR REPLACE FUNCTION update_equipamento_quantidade()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    IF EXISTS (SELECT 1 FROM guiaremessacomprascliente WHERE id_venda = NEW.id_venda) THEN
+        UPDATE EquipamentoArmazem AS ea
+        SET quantidade = ea.quantidade - vd.quantidade,
+            data_saida = CURRENT_DATE
+        FROM Vendas AS vd
+        WHERE ea.equipamentoID = vd.equipamentoID 
+          AND vd.vendaheaderid = NEW.id_venda;
+    END IF;
+
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER after_inserir_guia_cliente_trigger
+AFTER INSERT ON guiaremessacomprascliente
+FOR EACH ROW
+EXECUTE FUNCTION update_equipamento_quantidade();
+
